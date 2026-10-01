@@ -1,0 +1,57 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Tenant {
+  id          String    @id
+  buildingId  String    @map("building_id")
+  dpto        String
+  name        String
+  paymentDay  Int?      @map("payment_day")
+  phone       String?   @default("")
+  notes       String?   @default("")
+  isVacant    Boolean   @default(false) @map("is_vacant")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  payments    Payment[]
+
+  @@map("tenants")
+}
+
+model Payment {
+  id            String    @id
+  tenantId      String    @map("tenant_id")
+  buildingId    String    @map("building_id")
+  month         Int
+  year          Int
+  amount        Float
+  paidAt        DateTime? @map("paid_at")
+  paymentMethod String?   @default("Transferencia") @map("payment_method")
+  notes         String?   @default("")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, month, year])
+  @@map("payments")
+}
+
+model Expense {
+  id         String   @id
+  date       DateTime
+  amount     Float
+  category   String
+  buildingId String   @map("building_id")
+  notes      String?  @default("")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("expenses")
+}
